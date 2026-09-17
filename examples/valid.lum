@@ -1,0 +1,7 @@
+int total = 5;
+int count = 10;
+total = total + count;
+float price = 12.34;
+string name = "hello";
+bool flag = true;
+result = (total + count) * 2;
