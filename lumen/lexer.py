@@ -11,8 +11,11 @@ from .span import Span, Diagnostic
 from .tokens import Token, T, KEYWORDS
 
 _SIMPLE = {
-    "+": T.PLUS, "-": T.MINUS, "*": T.STAR, "/": T.SLASH,
-    "=": T.EQUAL, ";": T.SEMI, "(": T.LPAREN, ")": T.RPAREN,
+    "+": T.PLUS, "-": T.MINUS, "*": T.STAR, "/": T.SLASH, "%": T.PERCENT,
+    ";": T.SEMI, ",": T.COMMA,
+    "(": T.LPAREN, ")": T.RPAREN,
+    "{": T.LBRACE, "}": T.RBRACE,
+    "[": T.LBRACKET, "]": T.RBRACKET,
 }
 
 
@@ -60,6 +63,40 @@ class Lexer:
                 self._scan_string(start)
                 continue
 
+            # multi-char operators
+            two = ch + self._peek(1)
+            if two == "==":
+                self.pos += 2
+                self.tokens.append(Token(T.EQEQ, two, start, self.pos)); continue
+            if two == "!=":
+                self.pos += 2
+                self.tokens.append(Token(T.NEQ, two, start, self.pos)); continue
+            if two == "<=":
+                self.pos += 2
+                self.tokens.append(Token(T.LE, two, start, self.pos)); continue
+            if two == ">=":
+                self.pos += 2
+                self.tokens.append(Token(T.GE, two, start, self.pos)); continue
+            if two == "&&":
+                self.pos += 2
+                self.tokens.append(Token(T.AND, two, start, self.pos)); continue
+            if two == "||":
+                self.pos += 2
+                self.tokens.append(Token(T.OR, two, start, self.pos)); continue
+
+            if ch == "=":
+                self._advance()
+                self.tokens.append(Token(T.EQUAL, ch, start, self.pos)); continue
+            if ch == "<":
+                self._advance()
+                self.tokens.append(Token(T.LT, ch, start, self.pos)); continue
+            if ch == ">":
+                self._advance()
+                self.tokens.append(Token(T.GT, ch, start, self.pos)); continue
+            if ch == "!":
+                self._advance()
+                self.tokens.append(Token(T.NOT, ch, start, self.pos)); continue
+
             if ch in _SIMPLE:
                 self._advance()
                 self.tokens.append(Token(_SIMPLE[ch], ch, start, self.pos))
@@ -85,17 +122,13 @@ class Lexer:
         self.tokens.append(Token(kind, text, start, self.pos))
 
     def _scan_number(self, start: int):
-        is_float = False
         while self._peek().isdigit():
             self.pos += 1
         if self._peek() == "." and self._peek(1).isdigit():
-            is_float = True
             self.pos += 1
             while self._peek().isdigit():
                 self.pos += 1
-            # malformed: a second decimal point, e.g. 12.34.56
-            if self._peek() == "." :
-                bad_start = self.pos
+            if self._peek() == ".":
                 while self._peek().isdigit() or self._peek() == ".":
                     self.pos += 1
                 text = self.src[start:self.pos]
@@ -107,7 +140,6 @@ class Lexer:
                 ))
                 self.tokens.append(Token(T.ERROR, text, start, self.pos))
                 return
-        # malformed: digits immediately followed by letters, e.g. 12abc
         if self._peek().isalpha():
             while self._peek().isalnum() or self._peek() == "_":
                 self.pos += 1
@@ -124,11 +156,10 @@ class Lexer:
         self.tokens.append(Token(T.NUMBER, text, start, self.pos))
 
     def _scan_string(self, start: int):
-        self.pos += 1  # consume opening quote
+        self.pos += 1
         while True:
             ch = self._peek()
             if ch == "":
-                # Unterminated string: recover by synthetically closing it.
                 text = self.src[start:self.pos]
                 self.diagnostics.append(Diagnostic(
                     code="E0002",

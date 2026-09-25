@@ -6,7 +6,6 @@ line, an underline at the fault span, optional secondary labels, and
 help/note text. ANSI colour is used when the output is a terminal.
 """
 
-import sys
 from typing import List
 from .span import SourceMap, Diagnostic
 

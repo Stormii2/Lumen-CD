@@ -1,30 +1,33 @@
 #!/usr/bin/env python3
 """
-lumenc — Phase 1 prototype CLI for the Lumen diagnostics-first compiler.
+lumenc — Lumen compiler driver (Phase 2: full front-end + semantics + TAC).
 
 Usage:
-    python3 lumenc.py <source-file> [--no-color]
+    python3 lumenc.py <source-file> [--no-color] [--emit-tac] [--quiet-run]
 
-Runs the lexer and the parser subset (variable declarations, assignments,
-expressions) over the given file, collects every diagnostic from both
-phases (lexical + syntactic recovery is exercised, not just the first
-fault), and renders them with the caret renderer.
+Pipeline: lex -> parse -> type-check (with error poisoning) -> collect and
+render every diagnostic from all three phases. If the program is entirely
+diagnostic-free, it is lowered to three-address code and executed by the
+TAC interpreter, with `print(...)` output shown.
 
-Phase 1 scope only: no symbol table, type checker, suppression engine or
---fix patcher yet (those land in Phases 2 and 3 per the project roadmap).
+If there are diagnostics, codegen/execution is skipped — same as a real
+compiler refusing to run a program that didn't type-check.
 """
 
 import sys
-from lumen import Lexer, Parser, render_all
+from lumen import (Lexer, Parser, TypeChecker, TACGenerator, format_program,
+                    TACInterpreter, LumenRuntimeError, render_all)
 
 
 def main(argv):
     if len(argv) < 2:
-        print("usage: python3 lumenc.py <source-file> [--no-color]")
+        print("usage: python3 lumenc.py <source-file> [--no-color] [--emit-tac] [--quiet-run]")
         return 1
 
     path = argv[1]
     use_color = "--no-color" not in argv
+    emit_tac = "--emit-tac" in argv
+    quiet_run = "--quiet-run" in argv
 
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -37,17 +40,47 @@ def main(argv):
     tokens, lex_diags = lexer.scan()
 
     parser = Parser(tokens, source)
-    parser.parse_program()
+    items = parser.parse_program()
     parse_diags = parser.diagnostics
 
-    all_diags = lex_diags + parse_diags
-    # Stable order: by source position, so a lexical fault and a later
-    # syntactic fault print in the order a reader would hit them.
+    checker = TypeChecker(source)
+    checker.check_program(items)
+    check_diags = checker.diagnostics
+
+    all_diags = lex_diags + parse_diags + check_diags
     all_diags.sort(key=lambda d: d.span.start)
 
     print(f"$ lumenc {path}")
-    print(render_all(all_diags, source, path, use_color=use_color))
-    return 1 if all_diags else 0
+    if all_diags:
+        print(render_all(all_diags, source, path, use_color=use_color))
+        print(f"(codegen and execution skipped — {len(all_diags)} diagnostic(s) reported)")
+        return 1
+
+    print("compilation succeeded — 0 diagnostics.\n")
+
+    gen = TACGenerator()
+    functions = gen.generate(items)
+
+    if emit_tac:
+        print("--- three-address code ---")
+        print(format_program(functions))
+        print("--- end TAC ---\n")
+
+    if not quiet_run:
+        try:
+            interp = TACInterpreter(functions)
+            output = interp.run()
+            print("--- program output ---")
+            if output:
+                for line in output:
+                    print(line)
+            else:
+                print("(no output — program produced no print() calls)")
+        except LumenRuntimeError as e:
+            print(f"runtime error: {e}")
+            return 1
+
+    return 0
 
 
 if __name__ == "__main__":

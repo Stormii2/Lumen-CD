@@ -4,4 +4,5 @@ total = total + count;
 float price = 12.34;
 string name = "hello";
 bool flag = true;
-result = (total + count) * 2;
+int result = (total + count) * 2;
+print(result);
