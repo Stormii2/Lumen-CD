@@ -3,7 +3,7 @@ Module 1: Source Manager & Span Model.
 
 Maps byte offsets in the source file to (line, column) positions, and
 defines the Span/Label/Suggestion/Diagnostic building blocks that every
-later phase (lexer, parser, renderer) emits.
+later phase (lexer, parser, checker, renderer) emits.
 """
 
 from dataclasses import dataclass, field
@@ -15,14 +15,12 @@ class SourceMap:
 
     def __init__(self, source: str):
         self.source = source
-        # line_starts[i] = offset of the first character of line i+1
         self.line_starts: List[int] = [0]
         for i, ch in enumerate(source):
             if ch == "\n":
                 self.line_starts.append(i + 1)
 
     def offset_to_linecol(self, offset: int):
-        # binary search for the line containing `offset`
         lo, hi = 0, len(self.line_starts) - 1
         while lo < hi:
             mid = (lo + hi + 1) // 2
@@ -35,7 +33,6 @@ class SourceMap:
         return line, col
 
     def line_text(self, line_number: int) -> str:
-        """Return the raw text of a 1-indexed line, without the newline."""
         start = self.line_starts[line_number - 1]
         end = (
             self.line_starts[line_number]
@@ -47,8 +44,8 @@ class SourceMap:
 
 @dataclass
 class Span:
-    start: int  # byte offset, inclusive
-    end: int    # byte offset, exclusive
+    start: int
+    end: int
 
     def line_col(self, smap: SourceMap):
         return smap.offset_to_linecol(self.start)
@@ -62,14 +59,14 @@ class Label:
 
 @dataclass
 class Suggestion:
-    text: str          # e.g. "did you mean `total`?"
+    text: str
     replacement: Optional[str] = None
-    applicable: bool = False   # True => usable by --fix
+    applicable: bool = False
 
 
 @dataclass
 class Diagnostic:
-    code: str            # e.g. "E0201"
+    code: str
     message: str
     span: Span
     labels: List[Label] = field(default_factory=list)
