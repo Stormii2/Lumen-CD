@@ -1,4 +1,0 @@
-# Compiling and running Lumen programs needs only the Python standard library.
-pytest>=7.0          # test-suite
-matplotlib>=3.5      # optional: evaluation charts (eval/run_eval.py, eval/perf.py)
-pillow>=9.0          # optional: terminal-evidence images (tools/make_evidence.py)
