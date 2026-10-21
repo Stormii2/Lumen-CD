@@ -1,0 +1,23 @@
+func bool inRange(int v, int lo, int hi) {
+    return v >= lo && v <= hi;
+}
+
+func string classify(int age) {
+    if (age < 13) {
+        return "child";
+    }
+    if (inRange(age, 13, 19)) {
+        return "teen";
+    }
+    if (age >= 65 || age < 0) {
+        return "other";
+    }
+    return "adult";
+}
+
+print(classify(8));
+print(classify(15));
+print(classify(40));
+print(classify(70));
+bool flag = !inRange(5, 1, 3);
+print(flag);

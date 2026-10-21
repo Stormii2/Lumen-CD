@@ -1,0 +1,26 @@
+$ cat -n examples/factorial.lum
+  1  func int factorial(int n) {
+  2      if (n <= 1) {
+  3          return 1;
+  4      }
+  5      return n * factorial(n - 1);
+  6  }
+  7  
+  8  func int fibonacci(int n) {
+  9      if (n < 2) {
+ 10          return n;
+ 11      }
+ 12      return fibonacci(n - 1) + fibonacci(n - 2);
+ 13  }
+ 14  
+ 15  int a = factorial(6);
+ 16  int b = fibonacci(10);
+ 17  print(a);
+ 18  print(b);
+
+$ python3 lumenc.py examples/factorial.lum
+compilation succeeded - 0 diagnostics.
+
+720
+55
+[exit status 0]

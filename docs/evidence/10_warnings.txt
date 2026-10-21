@@ -1,0 +1,20 @@
+$ cat -n examples/warnings.lum
+  1  // Warnings do not stop compilation.
+  2  func int pick(int a) {
+  3      return a;
+  4      print("never runs");
+  5  }
+  6  print(pick(4));
+
+$ python3 lumenc.py examples/warnings.lum
+warning[W0002]: unreachable code after 'return'
+ --> examples/warnings.lum:4:5
+  |
+4 |     print("never runs");
+  |     ^^^^^^^^^^^^^^^^^^^^
+  |
+help: this statement can never run; remove it or move the 'return'
+0 errors, 1 warning generated.
+
+4
+[exit status 0]

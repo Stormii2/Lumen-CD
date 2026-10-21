@@ -1,0 +1,18 @@
+int total = totl + 1;
+total = total * 2;
+print(total);
+
+int total = 5;
+
+string label = "score: ";
+int score = label;
+
+bool flag = true;
+while (score) {
+    score = score + 1;
+}
+
+func int add(int a, int b) {
+    return a + b;
+}
+int sum = add(1, 2, 3);

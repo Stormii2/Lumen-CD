@@ -1,0 +1,9 @@
+int[] nums = [4, 8, 15, 16, 23, 42];
+int total = 0;
+int i = 0;
+while (i < 6) {
+    total = total + nums[i];
+    i = i + 1;
+}
+print(total);
+print(nums[2]);

@@ -1,0 +1,9 @@
+int total = 5;
+itn count = 10;
+total = total + count
+string name = "unterminated string;
+float price = 12.34.56;
+int weight = 9abc;
+int result = (total + count;
+bool flag = true;
+int weird@ = 1;

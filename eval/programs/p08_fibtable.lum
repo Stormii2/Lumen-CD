@@ -1,0 +1,21 @@
+func int fib(int n) {
+    if (n < 2) {
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);
+}
+
+int[] table = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+int i = 0;
+while (i < 10) {
+    table[i] = fib(i);
+    i = i + 1;
+}
+int total = 0;
+int j = 0;
+while (j < 10) {
+    total = total + table[j];
+    j = j + 1;
+}
+print(total);
+print(table[9]);

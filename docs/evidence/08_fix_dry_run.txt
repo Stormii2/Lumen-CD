@@ -1,0 +1,54 @@
+$ python3 lumenc.py examples/demo.lum --fix --diff
+--- examples/demo.lum
++++ examples/demo.lum (fixed)
+@@ -1,9 +1,9 @@
+ int total = 5;
+-itn count = 10;
+-total = total + count
++int count = 10;
++total = total + count;
+ string name = "unterminated string;
+ float price = 12.34.56;
+ int weight = 9abc;
+-int result = (total + count;
++int result = (total + count);
+ bool flag = true;
+ int weird@ = 1;
+lumenc: applied 3 fixes (dry run); 4 error(s) remain.
+error[E0002]: unterminated string literal
+ --> examples/demo.lum:4:15
+  |
+4 | string name = "unterminated string;
+  |               ^^^^^^^^^^^^^^^^^^^^^
+  |
+help: a closing '"' was inserted at end of line
+fix? (maybe-incorrect): add the closing '"'
+  | string name = "unterminated string;"
+
+error[E0003]: malformed numeric literal '12.34.56'
+ --> examples/demo.lum:5:15
+  |
+5 | float price = 12.34.56;
+  |               ^^^^^^^^
+  |
+help: a numeric literal may contain at most one decimal point
+
+error[E0003]: malformed numeric literal '9abc'
+ --> examples/demo.lum:6:14
+  |
+6 | int weight = 9abc;
+  |              ^^^^
+  |
+help: identifiers may not begin with a digit
+
+error[E0001]: invalid character '@'
+ --> examples/demo.lum:9:10
+  |
+9 | int weird@ = 1;
+  |          ^
+  |
+help: this character is not part of the Lumen alphabet; it was skipped
+fix? (maybe-incorrect): remove the character '@'
+  | int weird = 1;
+4 errors generated.
+[exit status 1]

@@ -1,0 +1,22 @@
+$ cat -n examples/cascade_demo.lum
+  1  // One real defect (a misspelled variable); a naive compiler reports many more.
+  2  int total = totl + 1;
+  3  int doubled = total * 2;
+  4  string label = doubled;
+  5  print(doubled + total);
+
+$ python3 lumenc.py examples/cascade_demo.lum
+error[E0412]: cannot find variable 'totl' in this scope
+ --> examples/cascade_demo.lum:2:13
+  |
+2 | int total = totl + 1;
+  |             ^^^^
+
+error[E0302]: cannot initialise 'string' variable 'label' with a value of type 'int'
+ --> examples/cascade_demo.lum:4:16
+  |
+4 | string label = doubled;
+  |                ^^^^^^^
+2 errors generated.
+(codegen and execution skipped)
+[exit status 1]

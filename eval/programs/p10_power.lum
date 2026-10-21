@@ -1,0 +1,19 @@
+func int power(int base, int exp) {
+    int result = 1;
+    int i = 0;
+    while (i < exp) {
+        result = result * base;
+        i = i + 1;
+    }
+    return result;
+}
+
+func float scale(int value, float factor) {
+    return value * factor;
+}
+
+print(power(2, 10));
+print(power(3, 5));
+print(scale(4, 2.5));
+string label = "done";
+print(label);

@@ -1,0 +1,15 @@
+$ cat -n examples/valid.lum
+  1  int total = 5;
+  2  int count = 10;
+  3  total = total + count;
+  4  float price = 12.34;
+  5  string name = "hello";
+  6  bool flag = true;
+  7  int result = (total + count) * 2;
+  8  print(result);
+
+$ python3 lumenc.py examples/valid.lum
+compilation succeeded - 0 diagnostics.
+
+50
+[exit status 0]

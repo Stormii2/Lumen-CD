@@ -1,0 +1,78 @@
+$ cat -n examples/demo.lum
+  1  int total = 5;
+  2  itn count = 10;
+  3  total = total + count
+  4  string name = "unterminated string;
+  5  float price = 12.34.56;
+  6  int weight = 9abc;
+  7  int result = (total + count;
+  8  bool flag = true;
+  9  int weird@ = 1;
+
+$ python3 lumenc.py examples/demo.lum
+error[E0410]: unknown type 'itn'
+ --> examples/demo.lum:2:1
+  |
+2 | itn count = 10;
+  | ^^^
+  |
+help: did you mean 'int'?
+fix (machine-applicable): replace 'itn' with 'int'
+  | int count = 10;
+
+error[E0201]: expected ';' after statement
+ --> examples/demo.lum:3:22
+  |
+3 | total = total + count
+  |                      ^
+  |
+help: a ';' was assumed here so parsing could continue
+fix (machine-applicable): insert ';'
+  | total = total + count;
+
+error[E0002]: unterminated string literal
+ --> examples/demo.lum:4:15
+  |
+4 | string name = "unterminated string;
+  |               ^^^^^^^^^^^^^^^^^^^^^
+  |
+help: a closing '"' was inserted at end of line
+fix? (maybe-incorrect): add the closing '"'
+  | string name = "unterminated string;"
+
+error[E0003]: malformed numeric literal '12.34.56'
+ --> examples/demo.lum:5:15
+  |
+5 | float price = 12.34.56;
+  |               ^^^^^^^^
+  |
+help: a numeric literal may contain at most one decimal point
+
+error[E0003]: malformed numeric literal '9abc'
+ --> examples/demo.lum:6:14
+  |
+6 | int weight = 9abc;
+  |              ^^^^
+  |
+help: identifiers may not begin with a digit
+
+error[E0202]: expected ')' to close expression
+ --> examples/demo.lum:7:28
+  |
+7 | int result = (total + count;
+  |                            ^
+fix (machine-applicable): insert the missing ')'
+  | int result = (total + count);
+
+error[E0001]: invalid character '@'
+ --> examples/demo.lum:9:10
+  |
+9 | int weird@ = 1;
+  |          ^
+  |
+help: this character is not part of the Lumen alphabet; it was skipped
+fix? (maybe-incorrect): remove the character '@'
+  | int weird = 1;
+7 errors generated.
+(codegen and execution skipped)
+[exit status 1]

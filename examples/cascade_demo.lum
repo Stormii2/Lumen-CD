@@ -1,0 +1,5 @@
+// One real defect (a misspelled variable); a naive compiler reports many more.
+int total = totl + 1;
+int doubled = total * 2;
+string label = doubled;
+print(doubled + total);

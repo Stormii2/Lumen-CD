@@ -1,0 +1,7 @@
+// Misspelled names: each defect gets one diagnostic with a repair.
+int counter = 0;
+whlie (counter < 3) {
+    counter = counter + 1;
+}
+itn limit = 10;
+print(countr + limit);

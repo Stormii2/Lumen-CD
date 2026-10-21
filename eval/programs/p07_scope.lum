@@ -1,0 +1,16 @@
+int level = 1;
+
+func int bump(int amount) {
+    level = level + amount;
+    return level;
+}
+
+int shadow = 10;
+if (true) {
+    int shadow = 20;
+    print(shadow);
+}
+print(shadow);
+print(bump(5));
+print(bump(2));
+print(level);

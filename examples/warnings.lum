@@ -1,0 +1,6 @@
+// Warnings do not stop compilation.
+func int pick(int a) {
+    return a;
+    print("never runs");
+}
+print(pick(4));

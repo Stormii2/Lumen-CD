@@ -1,0 +1,17 @@
+func int gcd(int a, int b) {
+    while (b != 0) {
+        int t = b;
+        b = a % b;
+        a = t;
+    }
+    return a;
+}
+
+func int lcm(int a, int b) {
+    return a / gcd(a, b) * b;
+}
+
+int x = 84;
+int y = 36;
+print(gcd(x, y));
+print(lcm(x, y));

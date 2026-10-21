@@ -1,0 +1,67 @@
+$ cat -n examples/semantic_errors.lum
+  1  int total = totl + 1;
+  2  total = total * 2;
+  3  print(total);
+  4  
+  5  int total = 5;
+  6  
+  7  string label = "score: ";
+  8  int score = label;
+  9  
+ 10  bool flag = true;
+ 11  while (score) {
+ 12      score = score + 1;
+ 13  }
+ 14  
+ 15  func int add(int a, int b) {
+ 16      return a + b;
+ 17  }
+ 18  int sum = add(1, 2, 3);
+
+$ python3 lumenc.py examples/semantic_errors.lum
+error[E0412]: cannot find variable 'totl' in this scope
+ --> examples/semantic_errors.lum:1:13
+  |
+1 | int total = totl + 1;
+  |             ^^^^
+
+error[E0300]: variable 'total' is already declared in this scope
+ --> examples/semantic_errors.lum:5:5
+  |
+5 | int total = 5;
+  |     ^^^^^
+  |
+1 | int total = totl + 1;
+  |     ----- first declared here
+fix? (maybe-incorrect): remove the type to assign to the existing variable
+  | total = 5;
+
+error[E0302]: cannot initialise 'int' variable 'score' with a value of type 'string'
+ --> examples/semantic_errors.lum:8:13
+  |
+8 | int score = label;
+  |             ^^^^^
+
+error[E0307]: while-condition must be 'bool', found 'int'
+  --> examples/semantic_errors.lum:11:8
+   |
+11 | while (score) {
+   |        ^^^^^
+   |
+help: Lumen has no implicit int-to-bool conversion
+fix? (maybe-incorrect): compare the value with zero to make it a 'bool'
+   | while (score != 0) {
+
+error[E0311]: 'add' expects 2 argument(s), found 3
+  --> examples/semantic_errors.lum:18:11
+   |
+18 | int sum = add(1, 2, 3);
+   |           ^^^^^^^^^^^^
+   |
+15 | func int add(int a, int b) {
+   |          --- 'add' is declared here
+   |
+help: signature: add(int a, int b)
+5 errors generated.
+(codegen and execution skipped)
+[exit status 1]

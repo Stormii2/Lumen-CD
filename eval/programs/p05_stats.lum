@@ -1,0 +1,25 @@
+func float average(float[] xs, int n) {
+    float sum = 0.0;
+    int i = 0;
+    while (i < n) {
+        sum = sum + xs[i];
+        i = i + 1;
+    }
+    return sum / n;
+}
+
+func float maxOf(float[] xs, int n) {
+    float best = xs[0];
+    int i = 1;
+    while (i < n) {
+        if (xs[i] > best) {
+            best = xs[i];
+        }
+        i = i + 1;
+    }
+    return best;
+}
+
+float[] scores = [88.5, 92.0, 79.5, 95.25, 67.0];
+print(average(scores, 5));
+print(maxOf(scores, 5));

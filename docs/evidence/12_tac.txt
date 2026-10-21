@@ -1,0 +1,43 @@
+$ python3 lumenc.py examples/arrays.lum --emit-tac --check
+compilation succeeded - 0 diagnostics.
+
+--- three-address code ---
+func __main__():
+    nums = new_array[6]
+    t1 = 4
+    nums[0] = t1
+    t2 = 8
+    nums[1] = t2
+    t3 = 15
+    nums[2] = t3
+    t4 = 16
+    nums[3] = t4
+    t5 = 23
+    nums[4] = t5
+    t6 = 42
+    nums[5] = t6
+    t7 = 0
+    total = t7
+    t8 = 0
+    i = t8
+L1:
+    t9 = 6
+    t10 = i < t9
+    if_false t10 goto L2
+    t11 = nums[i]
+    t12 = total + t11
+    total = t12
+    t13 = 1
+    t14 = i + t13
+    i = t14
+    goto L1
+L2:
+    param total
+    t15 = call print, 1
+    t16 = 2
+    t17 = nums[t16]
+    param t17
+    t18 = call print, 1
+
+--- end TAC ---
+[exit status 0]

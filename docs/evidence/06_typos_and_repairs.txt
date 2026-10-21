@@ -1,0 +1,42 @@
+$ cat -n examples/typos.lum
+  1  // Misspelled names: each defect gets one diagnostic with a repair.
+  2  int counter = 0;
+  3  whlie (counter < 3) {
+  4      counter = counter + 1;
+  5  }
+  6  itn limit = 10;
+  7  print(countr + limit);
+
+$ python3 lumenc.py examples/typos.lum
+error[E0411]: unknown keyword 'whlie'
+ --> examples/typos.lum:3:1
+  |
+3 | whlie (counter < 3) {
+  | ^^^^^
+  |
+help: did you mean 'while'?
+fix (machine-applicable): replace 'whlie' with 'while'
+  | while (counter < 3) {
+
+error[E0410]: unknown type 'itn'
+ --> examples/typos.lum:6:1
+  |
+6 | itn limit = 10;
+  | ^^^
+  |
+help: did you mean 'int'?
+fix (machine-applicable): replace 'itn' with 'int'
+  | int limit = 10;
+
+error[E0412]: cannot find variable 'countr' in this scope
+ --> examples/typos.lum:7:7
+  |
+7 | print(countr + limit);
+  |       ^^^^^^
+  |
+help: did you mean 'counter'?
+fix (machine-applicable): rename the variable to 'counter'
+  | print(counter + limit);
+3 errors generated.
+(codegen and execution skipped)
+[exit status 1]

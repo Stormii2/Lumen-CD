@@ -1,0 +1,26 @@
+$ python3 lumenc.py --explain E0412
+E0412: undeclared variable
+
+The name is not visible here. The closest visible name (Damerau-Levenshtein, type-aware) is suggested.
+
+Example that triggers it:
+
+    int count = 1;
+    print(cuont);
+
+Corrected:
+
+    int count = 1;
+    print(count);
+[exit status 0]
+
+$ python3 lumenc.py --explain R0003
+R0003: run-time: array index out of bounds
+
+Arrays are checked on both read and write; Phase 2 silently returned 0 / grew the array.
+
+Example that triggers it:
+
+    int[] a = [1, 2];
+    print(a[5]);
+[exit status 0]

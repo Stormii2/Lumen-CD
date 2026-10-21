@@ -1,0 +1,17 @@
+// Things the optimiser can see through.
+int scale = 2 * 3 + 4;          // constant folding: 10
+int total = 0;
+int i = 0;
+while (i < 5) {
+    int k = scale * 2;          // loop-invariant constant: 20
+    total = total + k + (i * 3) + (i * 3);   // common subexpression i * 3
+    i = i + 1;
+}
+if (scale > 100) {              // folded: never true
+    print(999);
+} else {
+    print(total);
+}
+bool debug = false;
+int zero = 0;
+if (debug) { print(1 / zero); }    // dead branch: the division is removed with it

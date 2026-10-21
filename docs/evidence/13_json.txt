@@ -1,0 +1,80 @@
+$ python3 lumenc.py examples/typos.lum --json
+{
+  "file": "examples/typos.lum",
+  "ok": false,
+  "diagnostics": [
+    {
+      "code": "E0411",
+      "severity": "error",
+      "phase": "parse",
+      "message": "unknown keyword 'whlie'",
+      "span": {
+        "start": 85,
+        "end": 90
+      },
+      "line": 3,
+      "column": 1,
+      "help": "did you mean 'while'?",
+      "suggestion": {
+        "text": "replace 'whlie' with 'while'",
+        "applicability": "machine-applicable",
+        "edits": [
+          {
+            "start": 85,
+            "end": 90,
+            "replacement": "while"
+          }
+        ]
+      }
+    },
+    {
+      "code": "E0410",
+      "severity": "error",
+      "phase": "parse",
+      "message": "unknown type 'itn'",
+      "span": {
+        "start": 136,
+        "end": 139
+      },
+      "line": 6,
+      "column": 1,
+      "help": "did you mean 'int'?",
+      "suggestion": {
+        "text": "replace 'itn' with 'int'",
+        "applicability": "machine-applicable",
+        "edits": [
+          {
+            "start": 136,
+            "end": 139,
+            "replacement": "int"
+          }
+        ]
+      }
+    },
+    {
+      "code": "E0412",
+      "severity": "error",
+      "phase": "sema",
+      "message": "cannot find variable 'countr' in this scope",
+      "span": {
+        "start": 158,
+        "end": 164
+      },
+      "line": 7,
+      "column": 7,
+      "help": "did you mean 'counter'?",
+      "suggestion": {
+        "text": "rename the variable to 'counter'",
+        "applicability": "machine-applicable",
+        "edits": [
+          {
+            "start": 158,
+            "end": 164,
+            "replacement": "counter"
+          }
+        ]
+      }
+    }
+  ]
+}
+[exit status 1]

@@ -1,0 +1,9 @@
+// Compiles cleanly, then fails at run time with a located error.
+int[] scores = [90, 85, 70];
+int i = 0;
+int total = 0;
+while (i <= 3) {
+    total = total + scores[i];
+    i = i + 1;
+}
+print(total);

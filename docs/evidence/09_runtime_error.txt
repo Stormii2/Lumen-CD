@@ -1,0 +1,20 @@
+$ cat -n examples/runtime_error.lum
+  1  // Compiles cleanly, then fails at run time with a located error.
+  2  int[] scores = [90, 85, 70];
+  3  int i = 0;
+  4  int total = 0;
+  5  while (i <= 3) {
+  6      total = total + scores[i];
+  7      i = i + 1;
+  8  }
+  9  print(total);
+
+$ python3 lumenc.py examples/runtime_error.lum
+compilation succeeded - 0 diagnostics.
+
+error[R0003]: array index out of bounds: index 3, length 3
+ --> examples/runtime_error.lum:6:21
+  |
+6 |     total = total + scores[i];
+  |                     ^^^^^^^^^
+[exit status 2]
