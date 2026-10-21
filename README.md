@@ -2,7 +2,7 @@
 
 **A diagnostics-first compiler for a small statically-typed language - lexer, recursive-descent parser, type checker, three-address-code generator and interpreter, built around multi-layer error recovery and machine-applicable repair suggestions.**
 
-Course project, BCSE307P Compiler Design Lab (VIT) - Srijan Sengupta, 24BCE2218.
+
 
 Most compilers either stop at the first error or recover so crudely that one mistake produces a dozen spurious messages. Lumen treats **diagnostic quality as the primary design axis**: it keeps going after an error, suppresses the cascade that error would normally cause, explains what is wrong with a source caret, and offers a repair - which `--fix` can apply.
 
