@@ -1,0 +1,201 @@
+"""
+Module 2: Complete Lexer with Recovery.
+
+Hand-written, maximal-munch scanner. On a lexical fault it emits a
+Diagnostic and resynchronises rather than aborting, so downstream phases
+still see a full (if partly error-tokened) stream.
+"""
+
+from typing import List, Tuple
+from .span import Span, Diagnostic, Suggestion, Edit, MAYBE
+from .tokens import Token, T, KEYWORDS
+
+_SIMPLE = {
+    "+": T.PLUS, "-": T.MINUS, "*": T.STAR, "/": T.SLASH, "%": T.PERCENT,
+    ";": T.SEMI, ",": T.COMMA,
+    "(": T.LPAREN, ")": T.RPAREN,
+    "{": T.LBRACE, "}": T.RBRACE,
+    "[": T.LBRACKET, "]": T.RBRACKET,
+}
+
+
+class Lexer:
+    def __init__(self, source: str):
+        self.src = source
+        self.n = len(source)
+        self.pos = 0
+        self.tokens: List[Token] = []
+        self.diagnostics: List[Diagnostic] = []
+
+    def _peek(self, offset=0) -> str:
+        i = self.pos + offset
+        return self.src[i] if i < self.n else ""
+
+    def _advance(self) -> str:
+        ch = self.src[self.pos]
+        self.pos += 1
+        return ch
+
+    def scan(self) -> Tuple[List[Token], List[Diagnostic]]:
+        while self.pos < self.n:
+            ch = self._peek()
+
+            if ch in " \t\r\n":
+                self.pos += 1
+                continue
+
+            if ch == "/" and self._peek(1) == "/":
+                while self.pos < self.n and self._peek() != "\n":
+                    self.pos += 1
+                continue
+
+            start = self.pos
+
+            if ch.isalpha() or ch == "_":
+                self._scan_ident_or_keyword(start)
+                continue
+
+            if ch.isdigit():
+                self._scan_number(start)
+                continue
+
+            if ch == '"':
+                self._scan_string(start)
+                continue
+
+            # multi-char operators
+            two = ch + self._peek(1)
+            if two == "==":
+                self.pos += 2
+                self.tokens.append(Token(T.EQEQ, two, start, self.pos)); continue
+            if two == "!=":
+                self.pos += 2
+                self.tokens.append(Token(T.NEQ, two, start, self.pos)); continue
+            if two == "<=":
+                self.pos += 2
+                self.tokens.append(Token(T.LE, two, start, self.pos)); continue
+            if two == ">=":
+                self.pos += 2
+                self.tokens.append(Token(T.GE, two, start, self.pos)); continue
+            if two == "&&":
+                self.pos += 2
+                self.tokens.append(Token(T.AND, two, start, self.pos)); continue
+            if two == "||":
+                self.pos += 2
+                self.tokens.append(Token(T.OR, two, start, self.pos)); continue
+
+            if ch == "=":
+                self._advance()
+                self.tokens.append(Token(T.EQUAL, ch, start, self.pos)); continue
+            if ch == "<":
+                self._advance()
+                self.tokens.append(Token(T.LT, ch, start, self.pos)); continue
+            if ch == ">":
+                self._advance()
+                self.tokens.append(Token(T.GT, ch, start, self.pos)); continue
+            if ch == "!":
+                self._advance()
+                self.tokens.append(Token(T.NOT, ch, start, self.pos)); continue
+
+            if ch in _SIMPLE:
+                self._advance()
+                self.tokens.append(Token(_SIMPLE[ch], ch, start, self.pos))
+                continue
+
+            # Unrecognised character: lexical recovery. Report it, and leave an
+            # ERROR token in the stream so the parser knows the text here is
+            # damaged and does not report fallout of the same fault.
+            self._advance()
+            self.diagnostics.append(Diagnostic(
+                code="E0001",
+                message=f"invalid character '{ch}'",
+                span=Span(start, self.pos),
+                help="this character is not part of the Lumen alphabet; it was skipped",
+                suggestion=Suggestion(f"remove the character '{ch}'",
+                                      [Edit(Span(start, self.pos), "")], MAYBE),
+                phase="lex",
+            ))
+            self.tokens.append(Token(T.ERROR, ch, start, self.pos, damaged=True))
+
+        self.tokens.append(Token(T.EOF, "", self.pos, self.pos))
+        return self.tokens, self.diagnostics
+
+    def _scan_ident_or_keyword(self, start: int):
+        while self._peek().isalnum() or self._peek() == "_":
+            self.pos += 1
+        text = self.src[start:self.pos]
+        kind = KEYWORDS.get(text, T.IDENT)
+        self.tokens.append(Token(kind, text, start, self.pos))
+
+    def _scan_number(self, start: int):
+        while self._peek().isdigit():
+            self.pos += 1
+        if self._peek() == "." and self._peek(1).isdigit():
+            self.pos += 1
+            while self._peek().isdigit():
+                self.pos += 1
+            if self._peek() == ".":
+                while self._peek().isdigit() or self._peek() == ".":
+                    self.pos += 1
+                text = self.src[start:self.pos]
+                self.diagnostics.append(Diagnostic(
+                    code="E0003",
+                    message=f"malformed numeric literal '{text}'",
+                    span=Span(start, self.pos),
+                    help="a numeric literal may contain at most one decimal point",
+                    phase="lex",
+                ))
+                self.tokens.append(Token(T.ERROR, text, start, self.pos, damaged=True))
+                return
+        if self._peek().isalpha():
+            while self._peek().isalnum() or self._peek() == "_":
+                self.pos += 1
+            text = self.src[start:self.pos]
+            self.diagnostics.append(Diagnostic(
+                code="E0003",
+                message=f"malformed numeric literal '{text}'",
+                span=Span(start, self.pos),
+                help="identifiers may not begin with a digit",
+                phase="lex",
+            ))
+            self.tokens.append(Token(T.ERROR, text, start, self.pos, damaged=True))
+            return
+        text = self.src[start:self.pos]
+        self.tokens.append(Token(T.NUMBER, text, start, self.pos))
+
+    def _scan_string(self, start: int):
+        self.pos += 1
+        while True:
+            ch = self._peek()
+            if ch == "":
+                text = self.src[start:self.pos]
+                self.diagnostics.append(Diagnostic(
+                    code="E0002",
+                    message="unterminated string literal",
+                    span=Span(start, self.pos),
+                    help="a closing '\"' was inserted at end of file",
+                    suggestion=Suggestion("add the closing '\"'",
+                                          [Edit(Span(self.pos, self.pos), '"')], MAYBE),
+                    phase="lex",
+                ))
+                self.tokens.append(Token(T.STRING, text, start, self.pos, damaged=True))
+                return
+            if ch == "\n":
+                text = self.src[start:self.pos]
+                self.diagnostics.append(Diagnostic(
+                    code="E0002",
+                    message="unterminated string literal",
+                    span=Span(start, self.pos),
+                    help="a closing '\"' was inserted at end of line",
+                    suggestion=Suggestion("add the closing '\"'",
+                                          [Edit(Span(self.pos, self.pos), '"')], MAYBE),
+                    phase="lex",
+                ))
+                self.tokens.append(Token(T.STRING, text, start, self.pos, damaged=True))
+                return
+            if ch == '"':
+                self.pos += 1
+                text = self.src[start:self.pos]
+                self.tokens.append(Token(T.STRING, text, start, self.pos))
+                return
+            self.pos += 1
